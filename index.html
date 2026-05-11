@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code-MayDay - Python Flight School</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48cae4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .aircraft {
+            display: inline-block;
+            font-size: 2rem;
+            animation: fly 3s ease-in-out infinite;
+            margin-left: 20px;
+        }
+
+        @keyframes fly {
+            0%, 100% { transform: translateY(0px) rotate(-5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stage-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stage-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .stage-card.completed::before {
+            content: '✈️';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+        }
+
+        .stage-number {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .stage-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .stage-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .difficulty {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .difficulty-dot.active {
+            background: #ff6b6b;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #feca57, #ff6b6b);
+            border-radius: 25px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .code-editor {
+            background: #2d3748;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 200px;
+            border: none;
+            resize: vertical;
+            width: 100%;
+        }
+
+        .run-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        .hint-btn {
+            background: #ed8936;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        .output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin-top: 15px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .game-board {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 25px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">Code-MayDay</h1>
+            <p class="tagline">Master Python Through Flight School Training <span class="aircraft">✈️</span></p>
+        </header>
+
+        <div class="progress-section">
+            <h2 class="progress-title">Flight Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number" id="completedStages">0</span>
+                    <span class="stat-label">Stages Completed</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="totalStages">60</span>
+                    <span class="stat-label">Total Stages</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="rank">Cadet</span>
+                    <span class="stat-label">Current Rank</span>
+                </div>
+            </div>
+        </div>
+
+        <main class="game-board" id="gameBoard" role="main" aria-label="Python learning stages">
+        </main>
+    </div>
+
+    <div class="modal" id="stageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModal" aria-label="Close modal">&times;</button>
+            <h2 id="modalTitle">Stage Title</h2>
+            <p id="modalDescription">Stage description goes here.</p>
+            
+            <h3>Your Mission:</h3>
+            <div id="missionContent"></div>
+            
+            <h3>Code Editor:</h3>
+            <textarea class="code-editor" id="codeEditor" placeholder="Write your Python code here..." aria-label="Python code editor"></textarea>
+            
+            <div>
+                <button class="run-btn" id="runCode">🚀 Run Code</button>
+                <button class="hint-btn" id="getHint">💡 Get Hint</button>
+            </div>
+            
+            <h3>Output:</h3>
+            <div class="output" id="output" role="log" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <script>
+        const stages = [
+            // Beginner stages (1-20)
+            { id: 1, title: "First Flight: Hello World", description: "Learn to output text with print()", difficulty: 1, topic: "basics", mission: "Print 'Hello, Pilot!' to the console", solution: "print('Hello, Pilot!')", hint: "Use the print() function with your text in quotes" },
+            { id: 2, title: "Flight Variables", description: "Store information in variables", difficulty: 1, topic: "variables", mission: "Create a variable 'aircraft' with value 'Boeing 747' and print it", solution: "aircraft = 'Boeing 747'\nprint(aircraft)", hint: "Use = to assign values to variables" },
+            { id: 3, title: "Altitude Calculator", description: "Perform basic math operations", difficulty: 1, topic: "math", mission: "Calculate the sum of two altitudes: 1000 and 2500", solution: "altitude1 = 1000\naltitude2 = 2500\ntotal = altitude1 + altitude2\nprint(total)", hint: "Use + for addition" },
+            { id: 4, title: "String Flight Path", description: "Work with text strings", difficulty: 1, topic: "strings", mission: "Combine 'Flight ' with '101' to create a flight number", solution: "flight_prefix = 'Flight '\nflight_number = '101'\nfull_flight = flight_prefix + flight_number\nprint(full_flight)", hint: "Use + to concatenate strings" },
+            { id: 5, title: "Pilot Input", description: "Get input from the pilot", difficulty: 1, topic: "input", mission: "Ask for pilot name and greet them", solution: "name = input('Enter pilot name: ')\nprint('Welcome, Captain ' + name + '!')", hint: "Use input() to get user input" },
+            { id: 6, title: "Weather Conditions", description: "Make decisions with if statements", difficulty: 2, topic: "conditionals", mission: "Check if visibility is greater than 5 miles for safe flying", solution: "visibility = float(input('Enter visibility in miles: '))\nif visibility > 5:\n    print('Safe to fly')\nelse:\n    print('Weather too poor for flight')", hint: "Use if/else statements to make decisions" },
+            { id: 7, title: "Flight Speed Check", description: "Use comparison operators", difficulty: 2, topic: "comparisons", mission: "Check if aircraft speed is within safe limits (150-300 mph)", solution: "speed = float(input('Enter speed: '))\nif 150 <= speed <= 300:\n    print('Speed within safe limits')\nelse:\n    print('Adjust speed!')", hint: "Use <= and >= for range checking" },
+            { id: 8, title: "Runway Selection", description: "Multiple conditions with elif", difficulty: 2, topic: "conditionals", mission: "Select runway based on wind direction (N, S, E, W)", solution: "wind = input('Wind direction (N/S/E/W): ')\nif wind == 'N':\n    print('Use Runway 36')\nelif wind == 'S':\n    print('Use Runway 18')\nelif wind == 'E':\n    print('Use Runway 09')\nelse:\n    print('Use Runway 27')", hint: "Use elif for multiple conditions" },
+            { id: 9, title: "Fuel Calculator", description: "Work with numbers and decimals", difficulty: 2, topic: "numbers", mission: "Calculate fuel consumption: distance / fuel_efficiency", solution: "distance = float(input('Distance in miles: '))\nefficiency = float(input('Miles per gallon: '))\nfuel_needed = distance / efficiency\nprint(f'Fuel needed: {fuel_needed:.2f} gallons')", hint: "Use / for division and format numbers with :.2f" },
+            { id: 10, title: "Pre-flight Checklist", description: "Create and work with lists", difficulty: 2, topic: "lists", mission: "Create a checklist and print each item", solution: "checklist = ['Check fuel', 'Test instruments', 'Check weather', 'File flight plan']\nfor item in checklist:\n    print('✓', item)", hint: "Use [] to create lists and for loops to iterate" },
+            { id: 11, title: "Flight Crew", description: "Add and remove from lists", difficulty: 2, topic: "lists", mission: "Manage flight crew list - add co-pilot, remove trainee", solution: "crew = ['Captain', 'Trainee']\ncrew.append('Co-pilot')\ncrew.remove('Trainee')\nprint(crew)", hint: "Use append() to add and remove() to delete items" },
+            { id: 12, title: "Airport Codes", description: "Work with dictionaries", difficulty: 2, topic: "dictionaries", mission: "Create airport code dictionary and lookup cities", solution: "airports = {'LAX': 'Los Angeles', 'JFK': 'New York', 'ORD': 'Chicago'}\ncode = input('Enter airport code: ')\nif code in airports:\n    print(airports[code])\nelse:\n    print('Airport not found')", hint: "Use {} for dictionaries and [] to access values" },
+            { id: 13, title: "Flight Duration", description: "Calculate time differences", difficulty: 2, topic: "time", mission: "Calculate flight duration from departure and arrival times", solution: "departure = int(input('Departure hour (24h format): '))\narrival = int(input('Arrival hour (24h format): '))\nduration = arrival - departure\nif duration < 0:\n    duration += 24\nprint(f'Flight duration: {duration} hours')", hint: "Handle day changes by adding 24 hours" },
+            { id: 14, title: "Passenger Counter", description: "Use loops for counting", difficulty: 2, topic: "loops", mission: "Count passengers boarding using a while loop", solution: "passengers = 0\nmax_passengers = int(input('Max passengers: '))\nwhile passengers < max_passengers:\n    passengers += 1\n    print(f'Passenger {passengers} boarded')\nprint('Aircraft full!')", hint: "Use while loops for repeated actions" },
+            { id: 15, title: "Flight Numbers", description: "Generate sequences with range", difficulty: 2, topic: "loops", mission: "Generate flight numbers from 100 to 110", solution: "for flight_num in range(100, 111):\n    print(f'Flight {flight_num}')", hint: "Use range(start, end+1) to generate numbers" },
+            { id: 16, title: "Emergency Codes", description: "Handle errors with try/except", difficulty: 3, topic: "exceptions", mission: "Safely convert user input to integer", solution: "try:\n    emergency_code = int(input('Enter emergency code: '))\n    print(f'Code {emergency_code} received')\nexcept ValueError:\n    print('Invalid code format!')", hint: "Use try/except to catch errors" },
+            { id: 17, title: "Flight Path Function", description: "Create your first function", difficulty: 3, topic: "functions", mission: "Create a function to calculate distance between airports", solution: "def calculate_distance(x1, y1, x2, y2):\n    distance = ((x2-x1)**2 + (y2-y1)**2)**0.5\n    return distance\n\nresult = calculate_distance(0, 0, 3, 4)\nprint(f'Distance: {result}')", hint: "Use def to create functions" },
+            { id: 18, title: "Fuel Efficiency", description: "Function with return values", difficulty: 3, topic: "functions", mission: "Create function to calculate fuel efficiency", solution: "def fuel_efficiency(distance, fuel_used):\n    if fuel_used == 0:\n        return 0\n    return distance / fuel_used\n\nefficiency = fuel_efficiency(500, 25)\nprint(f'Efficiency: {efficiency} miles/gallon')", hint: "Use return to send values back from functions" },
+            { id: 19, title: "Weather Report", description: "String formatting and methods", difficulty: 3, topic: "strings", mission: "Format weather report with temperature and conditions", solution: "temperature = input('Temperature: ')\nconditions = input('Conditions: ')\nreport = f'Weather Report: {temperature}°F, {conditions.upper()}'\nprint(report)\nprint(f'Report length: {len(report)} characters')", hint: "Use f-strings for formatting and .upper() for case conversion" },
+            { id: 20, title: "Flight Schedule", description: "Working with nested data", difficulty: 3, topic: "data-structures", mission: "Create and display flight schedule", solution: "schedule = {\n    'morning': ['Flight 101', 'Flight 102'],\n    'afternoon': ['Flight 201', 'Flight 202']\n}\n\nfor time_period, flights in schedule.items():\n    print(f'{time_period.upper()}:')\n    for flight in flights:\n        print(f'  {flight}')", hint: "Use nested loops to access data in dictionaries containing lists" },
+
+            // Intermediate stages (21-40)
+            { id: 21, title: "Advanced Navigation", description: "List comprehensions for efficient code", difficulty: 3, topic: "comprehensions", mission: "Create list of squared altitudes using comprehension", solution: "altitudes = [1000, 2000, 3000, 4000, 5000]\nsquared_altitudes = [alt**2 for alt in altitudes]\nprint(squared_altitudes)", hint: "Use [expression for item in list] syntax" },
+            { id: 22, title: "Flight Status Filter", description: "Filter data with conditions", difficulty: 3, topic: "comprehensions", mission: "Filter flights that are on time", solution: "flights = [{'num': '101', 'status': 'on-time'}, {'num': '102', 'status': 'delayed'}]\non_time = [f['num'] for f in flights if f['status'] == 'on-time']\nprint(on_time)", hint: "Add conditions to list comprehensions with if" },
+            { id: 23, title: "Aircraft Inventory", description: "Classes and objects", difficulty: 4, topic: "classes", mission: "Create Aircraft class with model and capacity", solution: "class Aircraft:\n    def __init__(self, model, capacity):\n        self.model = model\n        self.capacity = capacity\n    \n    def info(self):\n        return f'{self.model}: {self.capacity} passengers'\n\nplane = Aircraft('Boeing 737', 180)\nprint(plane.info())", hint: "Use class keyword and __init__ method" },
+            { id: 24, title: "Pilot Training", description: "Class methods and attributes", difficulty: 4, topic: "classes", mission: "Add flight hours tracking to Pilot class", solution: "class Pilot:\n    def __init__(self, name):\n        self.name = name\n        self.hours = 0\n    \n    def log_hours(self, hours):\n        self.hours += hours\n        print(f'{self.name}: {self.hours} total hours')\n\npilot = Pilot('John')\npilot.log_hours(5)", hint: "Methods can modify object attributes" },
+            { id: 25, title: "Import Navigation Tools", description: "Working with modules", difficulty: 3, topic: "modules", mission: "Use math module for navigation calculations", solution: "import math\n\ndef calculate_bearing(x1, y1, x2, y2):\n    angle = math.atan2(y2-y1, x2-x1)\n    bearing = math.degrees(angle)\n    return bearing\n\nresult = calculate_bearing(0, 0, 1, 1)\nprint(f'Bearing: {result:.1f} degrees')", hint: "Use import to access built-in modules" },
+            { id: 26, title: "Flight Data Analysis", description: "File handling basics", difficulty: 4, topic: "files", mission: "Read flight log from a text string", solution: "flight_log = \"Flight 101: 2 hours\\nFlight 102: 3 hours\"\nlines = flight_log.split('\\n')\nfor line in lines:\n    print(f'Logged: {line}')", hint: "Use split() to break text into lines" },
+            { id: 27, title: "Weather API Simulation", description: "Working with JSON-like data", difficulty: 4, topic: "json", mission: "Parse weather data dictionary", solution: "weather_data = {\n    'temperature': 72,\n    'wind_speed': 15,\n    'visibility': 10\n}\n\nfor key, value in weather_data.items():\n    print(f'{key.replace(\"_\", \" \").title()}: {value}')", hint: "Use .items() to iterate through dictionary key-value pairs" },
+            { id: 28, title: "Flight Time Zones", description: "Working with datetime concepts", difficulty: 4, topic: "datetime", mission: "Calculate arrival time with timezone offset", solution: "departure_hour = int(input('Departure hour (24h): '))\nflight_duration = int(input('Flight duration (hours): '))\ntimezone_offset = int(input('Timezone difference: '))\n\narrival = (departure_hour + flight_duration + timezone_offset) % 24\nprint(f'Arrival time: {arrival:02d}:00')", hint: "Use modulo (%) to handle 24-hour wraparound" },
+            { id: 29, title: "Emergency Response", description: "Exception handling patterns", difficulty: 4, topic: "exceptions", mission: "Handle multiple types of input errors", solution: "def safe_altitude_input():\n    try:\n        altitude = float(input('Enter altitude: '))\n        if altitude < 0:\n            raise ValueError('Altitude cannot be negative')\n        return altitude\n    except ValueError as e:\n        print(f'Error: {e}')\n        return None\n\nresult = safe_altitude_input()", hint: "Use raise to create custom errors" },
+            { id: 30, title: "Radio Communications", description: "String manipulation advanced", difficulty: 4, topic: "strings", mission: "Process radio callsigns and extract information", solution: "callsign = 'UNITED123'\nairline = ''.join([c for c in callsign if c.isalpha()])\nflight_num = ''.join([c for c in callsign if c.isdigit()])\nprint(f'Airline: {airline}, Flight: {flight_num}')", hint: "Use isalpha() and isdigit() to separate letters and numbers" },
+            { id: 31, title: "Flight Path Optimization", description: "Lambda functions for quick calculations", difficulty: 4, topic: "lambdas", mission: "Sort airports by distance using lambda", solution: "airports = [('LAX', 245), ('JFK', 2451), ('ORD', 735)]\nsorted_airports = sorted(airports, key=lambda x: x[1])\nfor code, distance in sorted_airports:\n    print(f'{code}: {distance} miles')", hint: "Lambda creates small anonymous functions" },
+            { id: 32, title: "Crew Scheduling", description: "Advanced data structures", difficulty: 4, topic: "data-structures", mission: "Manage crew assignments with sets", solution: "pilots = {'John', 'Jane', 'Bob'}\ncopilots = {'Alice', 'Bob', 'Carol'}\navailable_crew = pilots | copilots\nprint(f'Available crew: {sorted(available_crew)}')\nprint(f'Can do both roles: {pilots & copilots}')", hint: "Use set operations | (union) and & (intersection)" },
+            { id: 33, title: "Flight Performance", description: "Decorators for logging", difficulty: 5, topic: "decorators", mission: "Create a simple timing decorator", solution: "import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        end = time.time()\n        print(f'{func.__name__} took {end-start:.2f} seconds')\n        return result\n    return wrapper\n\n@timer\ndef calculate_fuel(distance):\n    time.sleep(0.1)  # Simulate calculation\n    return distance * 0.05\n\nfuel = calculate_fuel(1000)", hint: "Decorators wrap functions to add extra functionality" },
+            { id: 34, title: "Air Traffic Control", description: "Generators for memory efficiency", difficulty: 5, topic: "generators", mission: "Create flight number generator", solution: "def flight_generator(prefix, start, count):\n    for i in range(count):\n        yield f'{prefix}{start + i}'\n\nflights = flight_generator('UA', 100, 5)\nfor flight in flights:\n    print(flight)", hint: "Use yield instead of return to create generators" },
+            { id: 35, title: "Multi-Airport System", description: "Multiple inheritance", difficulty: 5, topic: "inheritance", mission: "Create specialized aircraft classes", solution: "class Aircraft:\n    def __init__(self, model):\n        self.model = model\n\nclass Passenger:\n    def board_passengers(self):\n        return 'Boarding passengers'\n\nclass CommercialAircraft(Aircraft, Passenger):\n    def __init__(self, model, capacity):\n        super().__init__(model)\n        self.capacity = capacity\n\nplane = CommercialAircraft('A320', 180)\nprint(plane.board_passengers())", hint: "Classes can inherit from multiple parent classes" },
+            { id: 36, title: "Flight Data Pipeline", description: "Map, filter, reduce operations", difficulty: 5, topic: "functional", mission: "Process flight data with functional programming", solution: "from functools import reduce\n\nflight_times = [2.5, 3.0, 1.5, 4.5, 2.0]\nlong_flights = list(filter(lambda x: x > 2.0, flight_times))\ntotal_time = reduce(lambda x, y: x + y, long_flights)\navg_time = total_time / len(long_flights)\nprint(f'Average long flight time: {avg_time:.1f} hours')", hint: "Use filter() to select items and reduce() to combine them" },
+            { id: 37, title: "Weather Pattern Matching", description: "Regular expressions", difficulty: 5, topic: "regex", mission: "Extract weather data from reports", solution: "import re\n\nweather_report = 'Wind: 15kt, Temp: 72F, Vis: 10mi'\nwind_match = re.search(r'Wind: (\\d+)kt', weather_report)\ntemp_match = re.search(r'Temp: (\\d+)F', weather_report)\n\nif wind_match and temp_match:\n    wind = int(wind_match.group(1))\n    temp = int(temp_match.group(1))\n    print(f'Wind: {wind}kt, Temperature: {temp}F')", hint: "Use parentheses in regex to capture groups"
